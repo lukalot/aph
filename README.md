@@ -1,11 +1,10 @@
 # Aph
 The repo for my tiny AI/Chatbot project, Aph. This is the currently under-development node version.
-The name means Anthropomorphizing Parodist Heuristic bot (inspired by HAL-9000's definition).
+The name means Anthropomorphizing Parodist Heuristic bot (inspired by [HAL 9000's definition](https://en.wikipedia.org/wiki/HAL_9000#Origin_of_name)).
 
 # Use
-To run, simply download the source code and run `RUN.bat` or do `python path_to_folder/uwuAI.py`
-
-Typing messages in the program console will cause Aph to respond to and store/learn from your responses.
+To run, simply download the source code and start `RUN.bat` or do `python path_to_folder/uwuAI.py`
+Typing messages into the program console will cause Aph to respond to and store/learn from your responses.
 
 # !help
 This is the help command output:
