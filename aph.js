@@ -1,3 +1,6 @@
+const difflib = require('difflib');
+const readline = require('readline');
+
 let title_art = `
   █████╗ ██████╗ ███╗ ███╗
  ██╔══██╗██╔══██╗██╔╝ ██╔╝
@@ -19,9 +22,6 @@ let help_text = `================== uwuAI Help ==================
 !ld / !load : Load memory from the given save file
 ================================================`;
 
-const difflib = require('difflib');
-const readline = require('readline');
-
 let selection_range = 1;
 
 function consoleFresh(title) {
@@ -38,10 +38,38 @@ function choice(...values) {
     }
 }
 
-let response = undefined;
+let response = '';
 let memory = {};
 let should_learn = true;
-let awaiting_input = false;
+let bool_onoff = { "true": "on", "false": "off" }
+
+let commands = {
+    "!help" : () => help_text,
+    "!memory" : () => console.log ( JSON.stringify ( memory ) ),
+    "!memorysize" : () => console.log ( Object.keys ( memory ).length ),
+    "!reset" : () => { memory = {}; should_learn = true; console.log ( "Memory cleared, Learning: " + bool_onoff [ should_learn ] ) },
+    "!forget" : () => { memory = {}; console.log ( "Memory cleared" ) },
+    "!clear" : () => consoleFresh(title_art),
+    "!shouldlearn" : () => { should_learn = !should_learn; console.log ( "Learning: " + bool_onoff [ should_learn ] ) },
+    "!save" : filename => { /*???*/ },
+    "!load" : filename => { /*???*/ }
+}
+
+let aliases = {
+    "!h": "!help",
+    "!m": "!memory",
+    "!ms": "!memorysize",
+    "!r": "!reset",
+    "!f": "!forget",
+    "!c": "!clear",
+    "!sl": "!shouldlearn",
+    "!s": "!save",
+    "!ld": "!load"
+}
+
+for ( const [ name, alias ] of Object.entries ( aliases ) ) {
+    commands [ name ] = commands [ alias ];
+}
 
 function converse(user_input) {
   if (should_learn) {
@@ -50,16 +78,16 @@ function converse(user_input) {
       memory[response] = [];
     }
     memory[response].push(user_input);
-    response = undefined;
   }
-  
+  response = '';
+
   if (Object.keys(memory).length > 0) {
     if (memory[user_input]) {
-      // console.log('<EXACT MATCH>');
-      response = choice(memory[user_input]);
+      // console.log('<EXACT MATCH>')
+      response = choice(memory[user_input])
     } else {
-      // console.log('<DIFFLIB MATCH>');
-      response = choice(memory[choice(difflib.getCloseMatches(user_input, Object.keys(memory), selection_range, 0))]);
+      // console.log('<DIFFLIB MATCH>')
+      response = choice(memory[choice(difflib.getCloseMatches(user_input, Object.keys(memory), selection_range, 0))])
     }
   }
   
@@ -67,7 +95,7 @@ function converse(user_input) {
     // console.log('<RESPONSE>');
     return response;
   } else {
-    throw "Should always return a value, FIXME!";
+    throw "Should always return a [positive] value, FIXME!";
   }
 }
 
@@ -82,9 +110,15 @@ const rl = readline.createInterface({
 rl.prompt()
 
 rl.on('line', (user_input) => {
-  let response;
-  while (!( response = converse(user_input) )) {}
-  console.log ( '< Aph >  ' + response );
+  let command = user_input.split ( " " );
+  if ( command [ 0 ] in commands ) {
+    // console.log ( '<USER COMMAND>' );
+    commands [ command [ 0 ] ] ( ...command.slice ( 1 ) );
+  } else {
+    let response;
+    response = converse ( user_input );
+    console.log ( '< Aph >  ' + response );
+  }
   rl.prompt();
 }).on('close', () => {
   console.log('end');
