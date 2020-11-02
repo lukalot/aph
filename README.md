@@ -1,5 +1,5 @@
 # Aph
-The repo for my tiny AI/Chatbot project, Aph. This is the currently under-development node version.
+The repo for my small AI/Chatbot project, Aph. This is the currently under-development node version.
 The name means Anthropomorphizing Parodist Heuristic bot (inspired by [HAL 9000's definition](https://en.wikipedia.org/wiki/HAL_9000#Origin_of_name)).
 
 # Use
