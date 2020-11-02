@@ -163,9 +163,11 @@ const rl = readline.createInterface({
 rl.prompt()
 
 rl.on('line', (user_input) => {
-  let args, switches, response;
+  let command, args, flags, response;
   if (user_input.startsWith(prefix)) {
-    ({ command, args, flags } = parseCommand ( user_input ));
+
+    ( { command, args, flags } = parseCommand ( user_input ) );
+    
     if ( command in commands ) {
       // console.log ( '<USER COMMAND>' );
       try {
