@@ -1,16 +1,14 @@
 module.exports = function parseCommand ( input ) {
+    let match, current_state, current_flag;
     const   command = /^[a-zA-Z_$]+[a-zA-Z0-9_$-]*/,
             whitespace = /^\s+/,
             argument = /^"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|[^\s]+/,
             flag = /^-([a-zA-Z_$]+[a-zA-Z0-9_$-]*)/,
-            match = null,
             result = {
                 command: '',
                 args: [],
                 flags: {}
             },
-            current_state = 'start',
-            current_flag = '',
             handleState = {
                 start: input => {
                     // consume command token
