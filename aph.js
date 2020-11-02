@@ -10,21 +10,9 @@ let title_art = `
  ██║  ██║██║     ██║  ██║
  ╚═╝  ╚═╝╚═╝    ███║ ███║
  © 2020 Lukalot ╚══╝ ╚══╝`;
- 
-let help_text = `================== uwuAI Help ==================
-!h / !help : Looks like you found this one
-!m / !memory : Output memory data
-!ms / !memorysize : Output memory size (based on the amount of keys stored in json)
-!r / !reset : Reset program to initial state
-!f / !forget : Forget all memory data
-!c / !clear : Clear console
-!sl / !shouldlearn : Toggle learning on or off
-!s / !save : Save memory to the given save file
-!ld / !load : Load memory from the given save file
-================================================`;
 
 let selection_range = 1;
-let prefix = '!';
+let prefix = '.';
 
 function consoleFresh(title) {
   console.clear();
@@ -40,21 +28,59 @@ function choice(...values) {
     }
 }
 
+function get_help() {
+  return `================== uwuAI Help ==================
+ ${prefix}help : Looks like you found this one
+ ${prefix}memory : Output memory data
+ ${prefix}memorysize : Output memory size (based on the amount of keys stored in json)
+ ${prefix}reset : Reset program to initial state
+ ${prefix}forget : Forget all memory data
+ ${prefix}clear : Clear console
+ ${prefix}shouldlearn : Toggle learning on or off
+ ${prefix}save : Save memory to the given save file
+ ${prefix}load : Load memory from the given save file
+================================================`;
+}
+
 let response = '';
 let memory = {};
 let should_learn = true;
 let bool_onoff = { "true": "on", "false": "off" }
 
 let commands = {
-  "help" : () => help_text,
+  "help" : () => get_help(),
   "memory" : () => JSON.stringify ( memory ),
   "memorysize" : () => Object.keys ( memory ).length,
   "reset" : () => { memory = {}; should_learn = true; console.log ( "Memory cleared, Learning: " + bool_onoff [ should_learn ] ) },
   "forget" : () => { memory = {}; console.log ( "Memory cleared" ) },
   "clear" : () => consoleFresh(title_art),
   "shouldlearn" : () => { should_learn = !should_learn; console.log ( "Learning: " + bool_onoff [ should_learn ] ) },
-  "save" : filename => { /*???*/ },
-  "load" : filename => { /*???*/ },
+  "save" : filename => {
+    if (filename) {
+      fs.writeFileSync('saves/' + filename + '.json', JSON.stringify ( memory ), "utf8");
+      console.log("Saved " + Object.keys ( memory ).length + " memory keys to " + filename + ".json")
+    } else {
+      fs.writeFileSync('saves/_default.json', JSON.stringify ( memory ), "utf8");
+      console.log("Saved " + Object.keys ( memory ).length + " memory keys to default save location (_default.json)")
+    }
+  },
+  "load" : filename => {
+      if (filename) {
+        memory = JSON.parse(fs.readFileSync('saves/' + filename + '.json', "utf8"));
+        console.log("Loaded " + Object.keys ( memory ).length + " memory keys from " + filename + ".json")
+      } else {
+        let res = '';
+        fs.readdirSync('./saves', { withFileTypes: false }).forEach(file => {
+          res = res + file + ', '
+        })
+
+        if (res) {
+          console.log("Loadable saves:\n" + ((res) ? res : "<none>"));
+        } else {
+          console.log("No saves found in ./saves")
+        }
+      }
+    },
   "setprefix" : newprefix => { prefix = newprefix }
 }
 
@@ -65,6 +91,7 @@ let aliases = {
     "r": "reset",
     "f": "forget",
     "c": "clear",
+    "cls": "clear",
     "sl": "shouldlearn",
     "s": "save",
     "ld": "load",
