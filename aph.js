@@ -1,6 +1,7 @@
 const difflib = require('difflib');
 const readline = require('readline');
 const fs = require('fs');
+const parseCommand = require ( './command-parser.js' );
 
 let title_art = `
   █████╗ ██████╗ ███╗ ███╗
@@ -55,7 +56,7 @@ let commands = {
   "forget" : () => { memory = {}; console.log ( "Memory cleared" ) },
   "clear" : () => consoleFresh(title_art),
   "shouldlearn" : () => { should_learn = !should_learn; console.log ( "Learning: " + bool_onoff [ should_learn ] ) },
-  "save" : filename => {
+  "save" : ( switches, filename ) => {
     if (filename) {
       fs.writeFileSync('saves/' + filename + '.json', JSON.stringify ( memory ), "utf8");
       console.log("Saved " + Object.keys ( memory ).length + " memory keys to " + filename + ".json")
@@ -64,7 +65,7 @@ let commands = {
       console.log("Saved " + Object.keys ( memory ).length + " memory keys to default save location (_default.json)")
     }
   },
-  "load" : filename => {
+  "load" : ( switches, filename ) => {
       if (filename) {
         memory = JSON.parse(fs.readFileSync('saves/' + filename + '.json', "utf8"));
         console.log("Loaded " + Object.keys ( memory ).length + " memory keys from " + filename + ".json")
@@ -96,7 +97,7 @@ let aliases = {
     "s": "save",
     "ld": "load",
     "sp": "setprefix",
-    "pre": "setprefix" 
+    "pre": "setprefix"
 }
 
 for ( const [ name, alias ] of Object.entries ( aliases ) ) {
@@ -123,7 +124,7 @@ function converse(user_input) {
       response = choice(memory[choice(difflib.getCloseMatches(user_input, Object.keys(memory), selection_range, 0))])
     }
   }
-  
+
   if (response) {
     // console.log('<RESPONSE>');
     return response;
@@ -143,12 +144,12 @@ const rl = readline.createInterface({
 rl.prompt()
 
 rl.on('line', (user_input) => {
-  let command, response;
+  let args, switches, response;
   if (user_input.startsWith(prefix)) {
-    command = user_input.slice(1).split ( " " );
-    if ( command [ 0 ] in commands ) {
+    { command, args, flags } = parseCommand ( user_input );
+    if ( command in commands ) {
       // console.log ( '<USER COMMAND>' );
-      response = commands [ command [ 0 ] ] ( ...command.slice ( 1 ) );
+      response = commands [ command ] ( flags, ...args );
       if ( response ) {
         console.log ( response );
       }
