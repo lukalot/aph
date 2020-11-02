@@ -1,57 +1,45 @@
+
+// dependencies
 const difflib = require('difflib');
 const readline = require('readline');
 const fs = require('fs');
+
+// aph modules
 const parseCommand = require ( './command-parser.js' );
 
-let title_art = `
+const VERSION = "v0.1 [alpha]"
+
+const TITLE_ART = `
   █████╗ ██████╗ ███╗ ███╗
  ██╔══██╗██╔══██╗██╔╝ ██╔╝
  ███████║██████╔╝███████║
  ██╔══██║██╔═══╝ ██╔══██║
  ██║  ██║██║     ██║  ██║
  ╚═╝  ╚═╝╚═╝    ███║ ███║
- © 2020 Lukalot ╚══╝ ╚══╝`;
+ © 2020 Lukalot ╚══╝ ╚══╝ ${VERSION}`;
 
+const DIVIDER_ART = "=".repeat(48);
+
+// settings
 let selection_range = 1;
 let prefix = '.';
+let should_learn = true;
 
-function consoleFresh(title) {
-  console.clear();
-  console.log(title);
-  console.log("=".repeat(48));
-}
-
-function choice(...values) {
-    if (values.length == 1) {
-      return values[0][Math.floor(Math.random()*values.length)];
-    } else {
-      return values[Math.floor(Math.random()*values.length)];
-    }
-}
-
-function getHelp() {
-  help = "help";
-  res = "=================== Aph Help ===================\n";
-  for ( const name of Object.keys ( commands ) ) {
-    res = res + " " + prefix + name + " : " + help + "\n";
-  }
-  res = res + "================================================"
-  return res;
-}
-
+// program variables
 let response = '';
 let memory = {};
-let should_learn = true;
 let bool_onoff = { "true": "on", "false": "off" }
 
 let commands = {
+  "get-version" : () => "Aph " + VERSION,
+  "about-aph" : () => fs.readFileSync('README.md', "utf8"),
   "get-help" : () => getHelp(),
   "get-memory" : () => JSON.stringify ( memory ),
-  "get-memory-size" : () => Object.keys ( memory ).length,
-  "reset-program" : () => { memory = {}; response = ''; should_learn = true; consoleFresh(title_art);},
+  "get-memory-size" : () => Object.keys ( memory ).length + " keys are in memory",
+  "reset-program" : () => { memory = {}; response = ''; should_learn = true; consoleFresh(TITLE_ART);},
   "forget-memory" : () => { memory = {}; response = ''; console.log ( "Memory cleared" ) },
-  "clear-screen" : () => consoleFresh(title_art),
-  "should-learn" : () => { should_learn = !should_learn; console.log ( "Learning: " + bool_onoff [ should_learn ] ) },
+  "clear-screen" : () => consoleFresh(TITLE_ART),
+  "toggle-learn" : () => { should_learn = !should_learn; console.log ( "Learning: " + bool_onoff [ should_learn ] ) },
   "save-memory" : ( switches, filename ) => {
     if (filename) {
       try {
@@ -94,35 +82,77 @@ let commands = {
         console.log("No saves found in ./saves")
       }
     },
-  "set-prefix" : newprefix => { prefix = newprefix },
+  "set-prefix" : (switches, newprefix) => {
+    if (typeOf(newprefix) == 'string') {
+      prefix = newprefix; console.log("Command prefix set to '" + prefix + "'")
+    } else {
+      console.log("incorrect usage");
+    } 
+  },
+  "add-key-response" : (switches, key, resp) => { memory[key].push(resp); console.log("Added response '" + resp + "' to key '" + key + "'") },
+  "delete-key" : (switches, key) => { console.log("Deleted key '" + key + "' including " + memory[key].length + " responses from memory"); delete memory[key]; },
 }
 
 let aliases = {
-    "h": "get-help",
-    "help": "get-help",
-    "m": "get-memory",
-    "ms": "get-memory-size",
-    "r": "reset-program",
-    "reset": "reset-program",
-    "f": "forget-memory",
     "c": "clear-screen",
     "cls": "clear-screen",
-    "sl": "should-learn",
-    "l": "should-learn",
-    "save": "save-memory",
-    "s": "save-memory",
-    "load": "load-memory",
+    "dk" : "delete-key",
+    "f": "forget-memory",
+    "about": "about-aph",
+    "h": "get-help",
+    "help": "get-help",
+    "l": "toggle-learn",
     "ld": "load-memory",
-    "sp": "set-prefix",
+    "load": "load-memory",
+    "ls" : "get-saves-list",
+    "m": "get-memory",
+    "ms": "get-memory-size",
     "pre": "set-prefix",
     "prefix": "set-prefix",
-    "ls" : "get-saves-list"
+    "r": "reset-program",
+    "reset": "reset-program",
+    "s": "save-memory",
+    "save": "save-memory",
+    "skr" : "add-key-response",
+    "setkr" : "add-key-response",
+    "sl": "should-learn",
+    "sp": "set-prefix",
+    "v": "get-version",
+    "ver": "get-version",
+    "version": "get-version"
 }
 
+// helper functions
+function consoleFresh(title) {
+  console.clear();
+  console.log(title);
+  console.log("=".repeat(48));
+}
+
+function choice(...values) {
+    if (values.length == 1) {
+      return values[0][Math.floor(Math.random()*values.length)];
+    } else {
+      return values[Math.floor(Math.random()*values.length)];
+    }
+}
+
+function getHelp() {
+  help = "help";
+  res = "=================== Aph Help ===================\n";
+  for ( const name of Object.keys ( commands ) ) {
+    res = res + " " + prefix + name + " : " + help + "\n";
+  }
+  res = res + DIVIDER_ART
+  return res;
+}
+
+// assign aliases to commands
 for ( const [ name, alias ] of Object.entries ( aliases ) ) {
     commands [ name ] = commands [ alias ];
 }
 
+// main logic
 function converse(user_input) {
   if (should_learn) {
     if (!memory[response]) {
@@ -148,11 +178,12 @@ function converse(user_input) {
     // console.log('<RESPONSE>');
     return response;
   } else {
-    throw "Should always return a [positive] value, FIXME!";
+    throw new Error("Should always return a [positive] value, FIXME!");
   }
 }
 
-consoleFresh(title_art);
+// initial console set
+consoleFresh(TITLE_ART);
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -176,7 +207,7 @@ rl.on('line', (user_input) => {
           console.log ( response );
         }
       } catch {
-        console.log ( "Alias '" + command + "' seems to point to a non-existant command name." );
+        console.log ( "'" + command + "' is running into a problem." );
       }
     }
   } else {
@@ -185,6 +216,6 @@ rl.on('line', (user_input) => {
   }
   rl.prompt();
 }).on('close', () => {
-  console.log('end');
+  console.log("\n" + DIVIDER_ART);
   process.exit(0);
 });
