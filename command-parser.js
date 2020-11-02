@@ -29,6 +29,9 @@ export function parseCommand ( input ) {
                     }
 
                     if ( match = input.match ( argument ) ) {       // consume argument if one is available
+                        // unescape quotes
+                        match [ 0 ] = match [ 0 ].replace ( /\\"/g, '"' ).replace ( /\\'/g, "'" );
+
                         if ( current_flag ) {
                             result.flags [ current_flag ].push ( match [ 0 ] );
                         } else {
