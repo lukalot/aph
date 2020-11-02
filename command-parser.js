@@ -1,5 +1,5 @@
 module.exports = function parseCommand ( input ) {
-    let match, current_state, current_flag;
+    let match, current_state = "start", current_flag;
     const   command = /^[a-zA-Z_$]+[a-zA-Z0-9_$-]*/,
             whitespace = /^\s+/,
             argument = /^"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|[^\s]+/,
