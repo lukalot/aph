@@ -9,14 +9,14 @@ module.exports = function parseCommand ( input ) {
                 args: [],
                 flags: {}
             },
-            state = 'start',
+            current_state = 'start',
             current_flag = '',
             handleState = {
                 start: input => {
                     // consume command token
                     if ( match = input.match ( command ) ) {
                         result.command = match [ 0 ];
-                        state = 'args';
+                        current_state = 'args';
                         return input.slice ( match [ 0 ].length );
                     }
 
@@ -39,7 +39,7 @@ module.exports = function parseCommand ( input ) {
                         }
                         return input.slice ( match [ 0 ].length );
                     } else if ( input.startsWith ( '-' ) ) {
-                        state = 'flags';
+                        current_state = 'flags';
                         return input;
                     }
 
@@ -61,7 +61,7 @@ module.exports = function parseCommand ( input ) {
 
                         return input.slice ( match [ 0 ].length );
                     } else {
-                        state = 'args';
+                        current_state = 'args';
                         return input;
                     }
                 }
@@ -72,7 +72,7 @@ module.exports = function parseCommand ( input ) {
 
     // consume input, starting with command, then taking command args, then alternating between flags and flag args
     while ( input ) {
-        input = handleState ( input );
+        input = handleState [ current_state ] ( input );
     }
     return result;
 }
