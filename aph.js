@@ -29,18 +29,14 @@ function choice(...values) {
     }
 }
 
-function get_help() {
-  return `================== uwuAI Help ==================
- ${prefix}help : Looks like you found this one
- ${prefix}memory : Output memory data
- ${prefix}memorysize : Output memory size (based on the amount of keys stored in json)
- ${prefix}reset : Reset program to initial state
- ${prefix}forget : Forget all memory data
- ${prefix}clear : Clear console
- ${prefix}shouldlearn : Toggle learning on or off
- ${prefix}save : Save memory to the given save file
- ${prefix}load : Load memory from the given save file
-================================================`;
+function getHelp() {
+  help = "help";
+  res = "=================== Aph Help ===================\n";
+  for ( const name of Object.keys ( commands ) ) {
+    res = res + " " + prefix + name + " : " + help + "\n";
+  }
+  res = res + "================================================"
+  return res;
 }
 
 let response = '';
@@ -49,55 +45,78 @@ let should_learn = true;
 let bool_onoff = { "true": "on", "false": "off" }
 
 let commands = {
-  "help" : () => get_help(),
-  "memory" : () => JSON.stringify ( memory ),
-  "memorysize" : () => Object.keys ( memory ).length,
-  "reset" : () => { memory = {}; should_learn = true; console.log ( "Memory cleared, Learning: " + bool_onoff [ should_learn ] ) },
-  "forget" : () => { memory = {}; console.log ( "Memory cleared" ) },
-  "clear" : () => consoleFresh(title_art),
-  "shouldlearn" : () => { should_learn = !should_learn; console.log ( "Learning: " + bool_onoff [ should_learn ] ) },
-  "save" : ( switches, filename ) => {
+  "get-help" : () => getHelp(),
+  "get-memory" : () => JSON.stringify ( memory ),
+  "get-memory-size" : () => Object.keys ( memory ).length,
+  "reset-program" : () => { memory = {}; response = ''; should_learn = true; consoleFresh(title_art);},
+  "forget-memory" : () => { memory = {}; response = ''; console.log ( "Memory cleared" ) },
+  "clear-screen" : () => consoleFresh(title_art),
+  "should-learn" : () => { should_learn = !should_learn; console.log ( "Learning: " + bool_onoff [ should_learn ] ) },
+  "save-memory" : ( switches, filename ) => {
     if (filename) {
-      fs.writeFileSync('saves/' + filename + '.json', JSON.stringify ( memory ), "utf8");
-      console.log("Saved " + Object.keys ( memory ).length + " memory keys to " + filename + ".json")
+      try {
+        fs.writeFileSync('saves/' + filename + '.json', JSON.stringify ( memory ), "utf8");
+        console.log("Saved " + Object.keys ( memory ).length + " memory keys to " + filename + ".json")
+      } catch {
+        console.log("Couldn't save to file '"+ filename + ".json' (Invalid filename?)")
+      }
     } else {
       fs.writeFileSync('saves/_default.json', JSON.stringify ( memory ), "utf8");
       console.log("Saved " + Object.keys ( memory ).length + " memory keys to default save location (_default.json)")
     }
   },
-  "load" : ( switches, filename ) => {
+  "load-memory" : ( switches, filename ) => {
       if (filename) {
-        memory = JSON.parse(fs.readFileSync('saves/' + filename + '.json', "utf8"));
-        console.log("Loaded " + Object.keys ( memory ).length + " memory keys from " + filename + ".json")
-      } else {
-        let res = '';
-        fs.readdirSync('./saves', { withFileTypes: false }).forEach(file => {
-          res = res + file + ', '
-        })
-
-        if (res) {
-          console.log("Loadable saves:\n" + ((res) ? res : "<none>"));
-        } else {
-          console.log("No saves found in ./saves")
+        try {
+          memory = JSON.parse(fs.readFileSync('saves/' + filename + '.json', "utf8"));
+          console.log("Loaded " + Object.keys ( memory ).length + " memory keys from " + filename + ".json")
+        } catch {
+          console.log("Couldn't find save file '"+ filename + ".json'")
         }
+      } else {
+        memory = JSON.parse(fs.readFileSync('saves/_default.json', "utf8"));
+        console.log("Loaded " + Object.keys ( memory ).length + " memory keys from default save location (_default.json)")
       }
     },
-  "setprefix" : newprefix => { prefix = newprefix }
+  "get-saves-list" : () => {
+      let res = '';
+      fs.readdirSync('./saves', { withFileTypes: false }).forEach((filen, idx, array) => {
+        res = res + filen
+        if (idx !== array.length - 1) {
+          // insert commas on all but the last iteration.
+          res = res + ', ';
+        }
+      })
+
+      if (res) {
+        console.log(((res) ? res : "<none>"));
+      } else {
+        console.log("No saves found in ./saves")
+      }
+    },
+  "set-prefix" : newprefix => { prefix = newprefix },
 }
 
 let aliases = {
-    "h": "help",
-    "m": "memory",
-    "ms": "memorysize",
-    "r": "reset",
-    "f": "forget",
-    "c": "clear",
-    "cls": "clear",
-    "sl": "shouldlearn",
-    "s": "save",
-    "ld": "load",
-    "sp": "setprefix",
-    "pre": "setprefix"
+    "h": "get-help",
+    "help": "get-help",
+    "m": "get-memory",
+    "ms": "get-memory-size",
+    "r": "reset-program",
+    "reset": "reset-program",
+    "f": "forget-memory",
+    "c": "clear-screen",
+    "cls": "clear-screen",
+    "sl": "should-learn",
+    "l": "should-learn",
+    "save": "save-memory",
+    "s": "save-memory",
+    "load": "load-memory",
+    "ld": "load-memory",
+    "sp": "set-prefix",
+    "pre": "set-prefix",
+    "prefix": "set-prefix",
+    "ls" : "get-saves-list"
 }
 
 for ( const [ name, alias ] of Object.entries ( aliases ) ) {
@@ -146,12 +165,16 @@ rl.prompt()
 rl.on('line', (user_input) => {
   let args, switches, response;
   if (user_input.startsWith(prefix)) {
-    { command, args, flags } = parseCommand ( user_input );
+    ({ command, args, flags } = parseCommand ( user_input ));
     if ( command in commands ) {
       // console.log ( '<USER COMMAND>' );
-      response = commands [ command ] ( flags, ...args );
-      if ( response ) {
-        console.log ( response );
+      try {
+        response = commands [ command ] ( flags, ...args );
+        if ( response ) {
+          console.log ( response );
+        }
+      } catch {
+        console.log ( "Alias '" + command + "' seems to point to a non-existant command name." );
       }
     }
   } else {
