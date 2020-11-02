@@ -1,5 +1,6 @@
 const difflib = require('difflib');
 const readline = require('readline');
+const fs = require('fs');
 
 let title_art = `
   █████╗ ██████╗ ███╗ ███╗
@@ -23,11 +24,12 @@ let help_text = `================== uwuAI Help ==================
 ================================================`;
 
 let selection_range = 1;
+let prefix = '!';
 
 function consoleFresh(title) {
   console.clear();
   console.log(title);
-  console.log("=".repeat(47));
+  console.log("=".repeat(48));
 }
 
 function choice(...values) {
@@ -44,27 +46,30 @@ let should_learn = true;
 let bool_onoff = { "true": "on", "false": "off" }
 
 let commands = {
-    "!help" : () => help_text,
-    "!memory" : () => console.log ( JSON.stringify ( memory ) ),
-    "!memorysize" : () => console.log ( Object.keys ( memory ).length ),
-    "!reset" : () => { memory = {}; should_learn = true; console.log ( "Memory cleared, Learning: " + bool_onoff [ should_learn ] ) },
-    "!forget" : () => { memory = {}; console.log ( "Memory cleared" ) },
-    "!clear" : () => consoleFresh(title_art),
-    "!shouldlearn" : () => { should_learn = !should_learn; console.log ( "Learning: " + bool_onoff [ should_learn ] ) },
-    "!save" : filename => { /*???*/ },
-    "!load" : filename => { /*???*/ }
+  "help" : () => help_text,
+  "memory" : () => JSON.stringify ( memory ),
+  "memorysize" : () => Object.keys ( memory ).length,
+  "reset" : () => { memory = {}; should_learn = true; console.log ( "Memory cleared, Learning: " + bool_onoff [ should_learn ] ) },
+  "forget" : () => { memory = {}; console.log ( "Memory cleared" ) },
+  "clear" : () => consoleFresh(title_art),
+  "shouldlearn" : () => { should_learn = !should_learn; console.log ( "Learning: " + bool_onoff [ should_learn ] ) },
+  "save" : filename => { /*???*/ },
+  "load" : filename => { /*???*/ },
+  "setprefix" : newprefix => { prefix = newprefix }
 }
 
 let aliases = {
-    "!h": "!help",
-    "!m": "!memory",
-    "!ms": "!memorysize",
-    "!r": "!reset",
-    "!f": "!forget",
-    "!c": "!clear",
-    "!sl": "!shouldlearn",
-    "!s": "!save",
-    "!ld": "!load"
+    "h": "help",
+    "m": "memory",
+    "ms": "memorysize",
+    "r": "reset",
+    "f": "forget",
+    "c": "clear",
+    "sl": "shouldlearn",
+    "s": "save",
+    "ld": "load",
+    "sp": "setprefix",
+    "pre": "setprefix" 
 }
 
 for ( const [ name, alias ] of Object.entries ( aliases ) ) {
@@ -79,6 +84,7 @@ function converse(user_input) {
     }
     memory[response].push(user_input);
   }
+
   response = '';
 
   if (Object.keys(memory).length > 0) {
@@ -110,12 +116,17 @@ const rl = readline.createInterface({
 rl.prompt()
 
 rl.on('line', (user_input) => {
-  let command = user_input.split ( " " );
-  if ( command [ 0 ] in commands ) {
-    // console.log ( '<USER COMMAND>' );
-    commands [ command [ 0 ] ] ( ...command.slice ( 1 ) );
+  let command, response;
+  if (user_input.startsWith(prefix)) {
+    command = user_input.slice(1).split ( " " );
+    if ( command [ 0 ] in commands ) {
+      // console.log ( '<USER COMMAND>' );
+      response = commands [ command [ 0 ] ] ( ...command.slice ( 1 ) );
+      if ( response ) {
+        console.log ( response );
+      }
+    }
   } else {
-    let response;
     response = converse ( user_input );
     console.log ( '< Aph >  ' + response );
   }
