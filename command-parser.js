@@ -1,4 +1,4 @@
-export function parseCommand ( input ) {
+module.exports = function parseCommand ( input ) {
     const   command = /^[a-zA-Z_$]+[a-zA-Z0-9_$-]*/,
             whitespace = /^\s+/,
             argument = /^"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|[^\s]+/,
