@@ -37,7 +37,8 @@ rl.on ( 'line', ( user_input ) => {
         if ( command in aph.commands ) {
             // console.log ( '<USER COMMAND>' );
             try {
-                aph.response = commands [ command ].call ( aph, flags, ...args );
+                let callback = aph.commands [ command ]
+                aph.response = callback [ callback.length - 1 ] .call ( aph, flags, ...args );
                 if ( aph.response ) {
                     console.log ( aph.response );
                 }
