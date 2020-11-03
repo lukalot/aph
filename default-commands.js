@@ -122,8 +122,8 @@ let commands = {
     } ],
 };
 
-for ( [ key, val ] of Object.keys ( commands ) ) {
-    val.pop ();
+for ( let [ key, val ] of Object.keys ( commands ) ) {
+    let callback = val.pop ();
 
     for ( name in val ) {
         if ( name in aliases ){
@@ -131,6 +131,8 @@ for ( [ key, val ] of Object.keys ( commands ) ) {
         }
         aliases [ name ] = key;
     }
+
+    commands [ key ] = callback;
 }
 
 module.exports = {
