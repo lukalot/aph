@@ -28,7 +28,7 @@ rl.on ( 'line', ( user_input ) => {
     let response;
     if ( user_input.startsWith ( prefix ) ) {
 
-        let { command, args, flags } = parseCommand ( user_input ) );
+        let { command, args, flags } = parseCommand ( user_input );
 
         if ( command in aph.aliases ) {
             command = aph.aliases [ command ];
