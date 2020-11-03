@@ -122,7 +122,7 @@ let commands = {
     } ],
 };
 
-for ( let [ key, val ] of Object.keys ( commands ) ) {
+for ( let [ key, val ] of Object.entries ( commands ) ) {
     let callback = val.pop ();
 
     for ( name in val ) {
