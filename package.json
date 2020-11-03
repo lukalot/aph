@@ -3,6 +3,10 @@
     "description": "A difflib based chat bot. The name means Anthropomorphizing Parodist Heuristic bot (inspired by HAL 9000's definition)",
     "version": "0.2.0",
     "author": "Lukalot <https://github.com/Lukalot>",
+    "contributors": [
+        "Lukalot <https://github.com/Lukalot>",
+        "EricBalingit <https://github.com/EricBalingit>"
+    ],
     "repository": {
         "type": "git",
         "url": "https://github.com/Lukalot/Aph"
