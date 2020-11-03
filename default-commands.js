@@ -1,5 +1,7 @@
 const bool_onoff = require ( "./helpers.js" ).bool_onoff;
 
+const fs = require ( 'fs' );
+
 let aliases = {};
 
 let helpers = {
@@ -8,21 +10,39 @@ let helpers = {
         console.log ( title );
         console.log ( "=".repeat ( 48 ) );
     },
-    showAliases: () => "{\n    " +
+    showAliases: () => {
+        "{\n    " +
         Object.entries ( aliases ).sort ( ( a, b ) => a [ 0 ] < b [ 0 ] ? -1 : a [ 0 ] > b [ 0 ] ? 1 : 0 ).map ( i => i.join ( ": " ) ).join ( "\n    " ) +
         "\n}"
+    },
+    stringToBoolean: (string) => {
+        switch(string.toLowerCase().trim()){
+            case "true": case "yes": case "1": return true;
+            case "false": case "no": case "0": return false;
+            default: return null;
+        }
+    }
 };
 
+
 let commands = {
-    "about-aph": [ "about", () =>
-        fs.readFileSync( 'README.md', "utf8" )
-    ],
-    "add-key-response": [ "setkr", "skr", function ( switches, key, resp ) {
+    /** Command conventions
+     * - Verbs --------
+     * get - getting information and logging it to the console
+     * set - setting somehing to a given value
+     * add - adding a value to a potential group of values
+     * toggle - switching between two or more prespecified values
+     * [other] - anything appropriate and consise if none of the above terms fit
+     * 
+     * - Aliases ------
+     * Aliases can be anything convenient or memorable.
+    **/
+    "add-key-response": [ "addkr", "kr", function ( switches, key, resp ) {
         this.memory [ key ].push ( resp );
         console.log ( "Added response '" + resp + "' to key '" + key + "'" )
     } ],
-    "clear-screen": [ "c", "cls", function () {
-        consoleFresh ( this.constructor.TITLE_ART )
+    "clear-screen": [ "c", "cls", "clear", function () {
+        helpers.consoleFresh ( this.constructor.TITLE_ART )
     } ],
     "delete-key": [ "dk", function ( switches, key ) {
         let memory = this.memory;
@@ -34,6 +54,9 @@ let commands = {
         this.response = '';
         console.log ( "Memory cleared" );
     } ],
+    "get-about": [ "about", () =>
+        fs.readFileSync( 'README.md', "utf8" )
+    ],
     "get-help": [ "h", "help", function () {
         let help = "help";
         let res = "=================== Aph Help ===================\n";
@@ -49,12 +72,15 @@ let commands = {
     "get-memory-size": [ "ms", function () {
         return Object.keys ( this.memory ).length + " keys are in memory"
     } ],
+    "get-response": [ "r", "response", function () {
+        return Object.keys ( this.memory ).length + " keys are in memory"
+    } ],
     "get-saves-list": [ "ls", () => {
         let res = '';
         fs.readdirSync ( './saves', {
             withFileTypes: false
-        } ).forEach ( ( filen, idx, array ) => {
-            res = res + filen;
+        } ).forEach ( ( filename, idx, array ) => {
+            res = res + filename;
             if ( idx !== array.length - 1 ) {
                 // insert commas on all but the last iteration.
                 res = res + ', ';
@@ -86,7 +112,7 @@ let commands = {
 
         this.memory = memory;
     } ],
-    "reset-program": [ "r", "reset", function () {
+    "reset-program": [ "reset", function () {
         this.memory = {};
         this.response = '';
         this.should_learn = true;
@@ -108,17 +134,25 @@ let commands = {
         }
     } ],
     "set-prefix": [ "pre", "prefix", "sp", function ( switches, newprefix ) {
-        if (typeOf(newprefix) == 'string') {
+        if (typeof newprefix == 'string') {
             this.prefix = newprefix;
             console.log("Command prefix set to '" + this.prefix + "'")
         } else {
             console.log("incorrect usage");
         }
     } ],
-    "should-learn": [ "sl", () => {} ],
-    "toggle-learn": [ "l", function () {
-        this.should_learn = !this.should_learn;
-        console.log("Learning: " + bool_onoff [ this.should_learn ] );
+    "set-learning": [ "l", function (switches, setting) {
+        if (setting) {
+            if (helpers.stringToBoolean(setting) !== null) {
+                this.should_learn = helpers.stringToBoolean(setting);
+                console.log("Set learning " + bool_onoff [ this.should_learn ] );
+            } else {
+                console.log("Set learning " + bool_onoff [ this.should_learn ] );
+            }
+        } else {
+            this.should_learn = !this.should_learn;
+            console.log("Toggled learning " + bool_onoff [ this.should_learn ] );
+        }
     } ],
 };
 

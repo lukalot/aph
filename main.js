@@ -1,7 +1,5 @@
 // dependencies
-const   difflib = require ( 'difflib' ),
-        readline = require ( 'readline' ),
-        fs = require ( 'fs' ),
+const   readline = require ( 'readline' ),
 
 // aph modules
         parseCommand = require ( './command-parser.js' ),
@@ -26,7 +24,7 @@ rl.prompt()
 
 rl.on ( 'line', ( user_input ) => {
     let response;
-    if ( user_input.startsWith ( prefix ) ) {
+    if ( user_input.startsWith ( aph.prefix ) ) {
 
         let { command, args, flags } = parseCommand ( user_input );
 
@@ -36,15 +34,18 @@ rl.on ( 'line', ( user_input ) => {
 
         if ( command in aph.commands ) {
             // console.log ( '<USER COMMAND>' );
-            try {
-                aph.response = aph.commands [ command ] .call ( aph, flags, ...args );
-                if ( aph.response ) {
-                    console.log ( aph.response );
+            //try {
+                response = aph.commands [ command ] .call ( aph, flags, ...args );
+                if ( response ) {
+                    console.log ( response );
                 }
-            } catch {
-                console.log("'" + command + "' is running into a problem.");
-            }
+            //} catch {
+            //    console.log("'" + command + "' is running into a problem.");
+            //}
+        } else {
+            console.log ( "'" + command + "' is not recognized as a command. Do .help for a list of existing commands." );
         }
+
     } else {
         aph.converse ( user_input );
         console.log( '< Aph >  ' + aph.response );

@@ -1,3 +1,3 @@
 module.exports = {
-    bool_onoff: { "true": "on", "false": "off" }
+    bool_onoff: { "true": "ON", "false": "OFF" }
 }

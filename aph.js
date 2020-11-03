@@ -1,4 +1,5 @@
-let VERSION = "v0.1 [alpha]",
+const
+    VERSION = "v0.1 [alpha]",
     TITLE_ART = `
   █████╗ ██████╗ ███╗ ███╗
  ██╔══██╗██╔══██╗██╔╝ ██╔╝
@@ -9,12 +10,12 @@ let VERSION = "v0.1 [alpha]",
  © 2020 Lukalot ╚══╝ ╚══╝ ${VERSION}`,
     DIVIDER_ART = "=".repeat ( 48 );
 
+const difflib = require ( 'difflib' );
+
 module.exports = class Aph {
 
     static VERSION = VERSION;
-
     static TITLE_ART = TITLE_ART;
-
     static DIVIDER_ART = DIVIDER_ART;
 
     constructor ( memory = {}, commands = {}, aliases = {}, prefix = '.', selection_range = 1, should_learn = true ) {
@@ -56,7 +57,7 @@ module.exports = class Aph {
                 response = this._choice ( memory [ user_input ] );
             } else {
                 // console.log('<DIFFLIB MATCH>')
-                response = choice(memory[choice(difflib.getCloseMatches(user_input, Object.keys(memory), selection_range, 0))])
+                response = this._choice(memory[this._choice(difflib.getCloseMatches(user_input, Object.keys(memory), this.selection_range, 0))])
             }
         }
 
