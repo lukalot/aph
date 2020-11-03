@@ -122,12 +122,12 @@ let commands = {
     } ],
 };
 
-for ( let [ key, val ] of Object.keys ( commands ) ) {
+for ( let [ key, val ] of Object.entries ( commands ) ) {
     let callback = val.pop ();
 
-    for ( name in val ) {
+    for ( name of val ) {
         if ( name in aliases ){
-            throw new Error ( "Duplicate aliases are not allowed" );
+            throw new Error ( "Duplicate aliases are not allowed: " + [ name, key ] );
         }
         aliases [ name ] = key;
     }

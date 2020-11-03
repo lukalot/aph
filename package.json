@@ -1,0 +1,37 @@
+{
+    "name": "Aph",
+    "description": "A difflib based chat bot. The name means Anthropomorphizing Parodist Heuristic bot (inspired by HAL 9000's definition)",
+    "version": "0.2.0",
+    "author": "Lukalot <https://github.com/Lukalot>",
+    "contributors": [
+        "Lukalot <https://github.com/Lukalot>",
+        "EricBalingit <https://github.com/EricBalingit>"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Lukalot/Aph"
+    },
+    "bugs": {
+        "type": "git",
+        "url": "https://github.com/Lukalot/Aph/issues"
+    },
+    "engines": {
+        "node": ">= 10.6.0",
+        "npm": ">= 6.1.0"
+    },
+    "main": "./main.js",
+    "keywords": [
+        "chatbot",
+        "difflib",
+        "python",
+        "python-javascript",
+        "javascript",
+        "js"
+    ],
+    "license": "GPL3",
+    "scripts": {},
+    "devDependencies": {},
+    "dependencies": {
+        "difflib": "0.2.4"
+    }
+}
